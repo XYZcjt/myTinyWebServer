@@ -325,6 +325,7 @@ void webServer::dealwithRead(int sockfd)
         // 若监测到读事件，将该事件放入请求队列
         m_pool->append(users + sockfd, 0);
 
+        // 循环检查，是否删除定时器
         while (true){
             if (1 == users[sockfd].improv){
                 if (1 == users[sockfd].timer_flag){
@@ -344,7 +345,7 @@ void webServer::dealwithRead(int sockfd)
             // printf("deal with the client!! \n");
             printf("deal with the client(%s)\n", inet_ntoa(users[sockfd].get_address()->sin_addr));
 
-            //若监测到读事件，将该事件放入请求队列
+            // 若监测到读事件，将该事件放入请求队列
             m_pool->append_p(users + sockfd);
 
             if (timer){
@@ -368,6 +369,7 @@ void webServer::dealwithWrite(int sockfd)
 
         m_pool->append(users + sockfd, 1);
 
+        // 与读取报文思路一样
         while (true){
             if (1 == users[sockfd].improv){
                 if (1 == users[sockfd].timer_flag){

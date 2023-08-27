@@ -117,9 +117,9 @@ void modfd(int epollfd, int fd, int ev, int TRIGMode){
 }
 
 // 用户连接量
-int http_conn::m_user_count=0;
+int http_conn::m_user_count = 0;
 // epoll描述符
-int http_conn::m_epollfd=-1;
+int http_conn::m_epollfd = -1;
 
 // 关闭连接，关闭一个，用户减一
 void http_conn::close_conn(bool real_close){

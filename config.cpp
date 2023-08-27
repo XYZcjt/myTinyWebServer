@@ -35,12 +35,14 @@ Config::Config(){
 void Config::parse_arg(int argc, char*argv[]){
     int opt;
     const char *str = "p:l:m:o:s:t:c:a:";
+    // getopt 是一个用于解析命令行选项的函数
     while ((opt = getopt(argc, argv, str)) != -1)
     {
         switch (opt)
         {
         case 'p':
         {
+            // atoi将字符串转换为整数
             PORT = atoi(optarg);
             break;
         }

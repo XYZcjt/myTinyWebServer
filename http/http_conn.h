@@ -55,11 +55,11 @@ public:
         NO_REQUEST,                 // 请求不完整，需要继续请求报文
         GET_REQUEST,                // 获得了完整的HTTP请求
         BAD_REQUEST,                // HTTP请求报文有语法错误
-        NO_RESOURCE,                 // 
-        FORBIDDEN_REQUEST,          // 
-        FILE_REQUEST,               // 
+        NO_RESOURCE,                // 没有资源
+        FORBIDDEN_REQUEST,          // 禁止访问
+        FILE_REQUEST,               // 文件存在
         INTERNAL_ERROR,             // 服务器内部错误
-        CLOSED_CONNECTION           // 
+        CLOSED_CONNECTION           // 关闭连接
     };
     
 public:
@@ -68,10 +68,9 @@ public:
 
 public:
     // 初始化套接字地址，函数内部会调用私有init，占位符？？？
-    void init(int sockfd,const sockaddr_in &addr,char*,int,int,string user,string passwd,string sqlname);
+    void init(int sockfd, const sockaddr_in &addr, char*, int, int, string user, string passwd, string sqlname);
     // 关闭http连接
     void close_conn(bool real_close=true);
-    // 
     void process();
     // 读取浏览器端发来的全部数据
     bool read_once();
@@ -83,9 +82,9 @@ public:
     }
     // 初始化数据库中的数据，获得用户名和密码
     void initmysql_result(connection_pool *connPool);
-    // 
+    // 是否删除定时器
     int timer_flag;
-    // 
+    // 报文是否处理过
     int improv;
 
 private:
@@ -142,7 +141,7 @@ private:
 
     // 存储响应报文的数据
     char m_write_buf[WRITE_BUFFER_SIZE];
-    // ？？？
+    // 写缓冲区的长度
     long m_write_idx;
 
     // 主状态机的状态
@@ -165,7 +164,7 @@ private:
     int m_iv_count;
     // 是否启用POST
     int cgi;
-    // 存储请求头数据
+    // 存储消息体的数据，用户名和密码
     char *m_string;
     // 剩余发送的字节数
     int bytes_to_send;
@@ -174,13 +173,13 @@ private:
     //网站根目录，文件夹内存放请求的资源和跳转的html文件
     char *doc_root;
 
-    // ？？？
+    // 存放数据库用户的信息
     map<string,string> m_users;
     // 为0，LT方式读取数据；为1，ET方式读取数据
     int m_TRIGMode;
     int m_close_log;
 
-    // ？？？
+    // 存放报文传过来的用户和密码
     char sql_user[100];
     char sql_passwd[100];
     char sql_name[100];

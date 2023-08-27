@@ -23,7 +23,7 @@ private:
     locker m_queuelocker;        // 使用队列时的互斥锁
     sem m_queuestate;            // 是否有任务要处理
     connection_pool *m_connPool; // 数据库连接
-    int m_actor_model;           // 模型切换？？？
+    int m_actor_model;           // 1为reactor模式， 0为proactor
 
 
 private:
@@ -69,14 +69,15 @@ threadpool<T>::~threadpool()
 }
 
 template<typename T>
-bool threadpool<T>::append(T* request,int state){
+bool threadpool<T>::append(T* request, int state){
     m_queuelocker.lock();
     // 任务队列满，添加失败
     if(m_workqueue.size() >= m_max_requests){
         m_queuelocker.unlock();
         return false;
     }
-    request->m_state = state;           // ？？？？？
+    // 读取报文为 0，响应报文为 1
+    request->m_state = state;
     m_workqueue.push_back(request);
     m_queuelocker.unlock();
     // 唤醒消费者
@@ -124,20 +125,24 @@ void threadpool<T>::run(){
             continue;
         }
 
+        // 1为reactor模式， 0为proactor
         if (1 == m_actor_model){
-            // m_state(0) 表示 epollin 事件
+            // m_state(0) 表示 epollin(读取) 事件
             if (0 == request->m_state){
+                // 循环读取数据
                 if (request->read_once()){
                     request->improv = 1;
                     connectionRAII mysqlcon(&request->mysql, m_connPool);
                     request->process();
                 }
+                // 读取失败，timer_flag设置为1，代表要要删除
+                // improv设置为1，代表已经读取过报文
                 else{
                     request->improv = 1;
                     request->timer_flag = 1;
                 }
             }
-            // m_state(1) 表示 epollout 事件
+            // m_state(1) 表示 epollout(响应) 事件
             else{
                 if (request->write()){
                     request->improv = 1;
